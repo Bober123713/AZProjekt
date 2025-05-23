@@ -1,29 +1,50 @@
 using AZProjekt.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AZProjekt;
 
 public static class Solver
 {
+    /// <summary>
+    /// Finds the Minimum Spanning Tree using Prim's algorithm
+    /// </summary>
     public static List<Edge> FindMst(Graph graph, int startVertex)
     {
+        if (graph == null)
+            throw new ArgumentNullException(nameof(graph));
+            
+        if (startVertex < 0 || startVertex >= graph.VertexCount)
+            throw new ArgumentOutOfRangeException(nameof(startVertex));
+            
         var inMst = new bool[graph.VertexCount];
         var key = new double[graph.VertexCount];
         var parent = new int[graph.VertexCount];
 
+        // Initialize all keys as infinity and MST status as false
         for (var i = 0; i < graph.VertexCount; i++)
         {
-            key[i] = int.MaxValue;
+            key[i] = double.MaxValue; // Use double.MaxValue instead of int.MaxValue
             inMst[i] = false;
         }
 
+        // Start with the given vertex
         key[startVertex] = 0;
         parent[startVertex] = -1;
 
+        // Build the MST with (V-1) edges
         for (var count = 0; count < graph.VertexCount - 1; count++)
         {
             var u = MinKey(key, inMst, graph.VertexCount);
+            
+            // If no valid vertex found, the graph might be disconnected
+            if (u == -1)
+                break;
+                
             inMst[u] = true;
 
+            // Update key values of adjacent vertices
             foreach (var edge in graph.AdjacencyList[u])
             {
                 var v = edge.Destination;
@@ -55,17 +76,27 @@ public static class Solver
 
         for (var v = 0; v < vertexCount; v++)
         {
-            if (inMst[v] || key[v] >= min) continue;
-            min = key[v];
-            minIndex = v;
+            if (!inMst[v] && key[v] < min)
+            {
+                min = key[v];
+                minIndex = v;
+            }
         }
 
         return minIndex;
     }
 
-// Function to build MST graph from list of edges
+    /// <summary>
+    /// Builds a graph representing the MST from a list of edges
+    /// </summary>
     public static Graph BuildMstGraph(Graph originalGraph, List<Edge> mstEdges)
     {
+        if (originalGraph == null)
+            throw new ArgumentNullException(nameof(originalGraph));
+            
+        if (mstEdges == null)
+            throw new ArgumentNullException(nameof(mstEdges));
+            
         var mstGraph = new Graph(originalGraph.VertexCount);
 
         // Copy vertex mapping
@@ -74,7 +105,7 @@ public static class Solver
             mstGraph.AddVertex(kvp.Key, kvp.Value);
         }
 
-        // Add MST edges
+        // Add MST edges (bidirectional for traversal)
         foreach (var edge in mstEdges)
         {
             mstGraph.AddEdge(edge.Source, edge.Destination, edge.Weight);
@@ -84,9 +115,17 @@ public static class Solver
         return mstGraph;
     }
 
-// Perform full tree walk (DFS) and build list W
+    /// <summary>
+    /// Performs a full tree walk (DFS) and builds list W
+    /// </summary>
     public static List<int> FullTreeWalk(Graph mstGraph, int root)
     {
+        if (mstGraph == null)
+            throw new ArgumentNullException(nameof(mstGraph));
+            
+        if (root < 0 || root >= mstGraph.VertexCount)
+            throw new ArgumentOutOfRangeException(nameof(root));
+            
         var w = new List<int>();
         var visited = new bool[mstGraph.VertexCount];
 
@@ -100,24 +139,41 @@ public static class Solver
         w.Add(u); // Add current vertex to W
         visited[u] = true;
 
-        foreach (var v in graph.AdjacencyList[u].Select(edge => edge.Destination).Where(v => v != parent && !visited[v]))
+        // Visit all unvisited neighbors
+        foreach (var edge in graph.AdjacencyList[u])
         {
-            FullTreeWalkRecursive(graph, v, u, w, visited);
-            w.Add(u); // Return to u after visiting subtree
+            var v = edge.Destination;
+            if (v != parent && !visited[v])
+            {
+                FullTreeWalkRecursive(graph, v, u, w, visited);
+                w.Add(u); // Return to u after visiting subtree
+            }
         }
     }
 
-// Find path in MST between two vertices
+    /// <summary>
+    /// Finds a path in the MST between two vertices
+    /// </summary>
     public static List<int> FindPathInMst(Graph mstGraph, int source, int destination)
     {
+        if (mstGraph == null)
+            throw new ArgumentNullException(nameof(mstGraph));
+            
+        if (source < 0 || source >= mstGraph.VertexCount)
+            throw new ArgumentOutOfRangeException(nameof(source));
+            
+        if (destination < 0 || destination >= mstGraph.VertexCount)
+            throw new ArgumentOutOfRangeException(nameof(destination));
+            
         var parent = new Dictionary<int, int>();
         var visited = new HashSet<int>();
 
         var foundPath = DfsFindPath(mstGraph, source, destination, parent, visited);
 
         if (!foundPath)
-            return [];
+            return new List<int>(); // Return empty list if no path found
 
+        // Reconstruct the path
         var path = new List<int>();
         var current = destination;
 
@@ -140,19 +196,41 @@ public static class Solver
 
         visited.Add(vertex);
 
-        foreach (var next in graph.AdjacencyList[vertex].Select(edge => edge.Destination).Where(next => !visited.Contains(next)))
+        foreach (var edge in graph.AdjacencyList[vertex])
         {
-            parent[next] = vertex;
-            if (DfsFindPath(graph, next, destination, parent, visited))
-                return true;
+            var next = edge.Destination;
+            if (!visited.Contains(next))
+            {
+                parent[next] = vertex;
+                if (DfsFindPath(graph, next, destination, parent, visited))
+                    return true;
+            }
         }
 
         return false;
     }
 
-// Main approximation algorithm for Bottleneck TSP
-    public static Solution ApproxBottleneckTsp(Graph graph, int root)
+    /// <summary>
+    /// Main approximation algorithm for Bottleneck TSP
+    /// </summary>
+    public static Solution ApproxBottleneckTsp(Graph graph, int root = 0)
     {
+        if (graph == null)
+            throw new ArgumentNullException(nameof(graph));
+            
+        if (root < 0 || root >= graph.VertexCount)
+            throw new ArgumentOutOfRangeException(nameof(root));
+            
+        // Handle special case for small graphs
+        if (graph.VertexCount <= 1)
+            return new Solution(0, new List<int> { root + 1 });
+            
+        if (graph.VertexCount == 2)
+        {
+            double edgeCost = graph.AdjacencyMatrix[0][1];
+            return new Solution(edgeCost, new List<int> { 1, 2, 1 });
+        }
+
         // Find MST
         var mstEdges = FindMst(graph, root);
         var mstGraph = BuildMstGraph(graph, mstEdges);
@@ -160,48 +238,22 @@ public static class Solver
         // Perform full tree walk to get list W
         var w = FullTreeWalk(mstGraph, root);
 
-        // Construct Hamiltonian cycle H
+        // Construct Hamiltonian cycle H using shortcutting
         var h = new List<int>();
-        var visited = new bool[graph.VertexCount];
+        var visited = new HashSet<int>();
 
-        // Add first vertex
-        h.Add(w[0]);
-        visited[w[0]] = true;
-
-        var skipped = 0; // Counter for skipped consecutive vertices
-
-        // Process remaining vertices in W
-        for (var i = 1; i < w.Count; i++)
+        // Process vertices in W to create a Hamiltonian cycle
+        foreach (var vertex in w)
         {
-            var currentVertex = w[i];
-
-            if (!visited[currentVertex])
+            if (!visited.Contains(vertex))
             {
-                // If vertex not visited yet, add it to H
-                h.Add(currentVertex);
-                visited[currentVertex] = true;
-                skipped = 0; // Reset skipped counter
-            }
-            else if (skipped == 2)
-            {
-                // If already skipped 2 consecutive vertices, must add this one
-                // Only if it's different from the last vertex in H
-                if (currentVertex != h[^1])
-                {
-                    h.Add(currentVertex);
-                }
-
-                skipped = 0; // Reset skipped counter
-            }
-            else
-            {
-                // Skip this vertex and increment counter
-                skipped++;
+                h.Add(vertex);
+                visited.Add(vertex);
             }
         }
 
-        // Close the cycle by returning to the first vertex if needed
-        if (h[^1] != h[0])
+        // Ensure we have a cycle by adding the first vertex at the end
+        if (h.Count > 0 && h[0] != h[^1])
         {
             h.Add(h[0]);
         }
@@ -213,17 +265,14 @@ public static class Solver
             var u = h[i];
             var v = h[i + 1];
 
-            // Find direct edge cost in original graph
-            var edgeCost = double.MaxValue;
-            foreach (var edge in graph.AdjacencyList[u].Where(edge => edge.Destination == v))
-            {
-                edgeCost = edge.Weight;
-                break;
-            }
-
+            // Get edge cost from the original graph's adjacency matrix
+            var edgeCost = graph.AdjacencyMatrix[u][v];
             bottleneckCost = Math.Max(bottleneckCost, edgeCost);
         }
 
-        return new Solution(bottleneckCost, h.Select(i => i + 1).ToList());
+        // Convert to 1-based indexing for the solution
+        var tour1Based = h.Select(v => v + 1).ToList();
+        
+        return new Solution(bottleneckCost, tour1Based);
     }
 }
