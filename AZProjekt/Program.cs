@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
 using AZProjekt;
 
@@ -16,7 +17,9 @@ using AZProjekt;
         int solvedCount = 0;
         int lowerCount = 0;
         var incorrect = new ConcurrentQueue<string>();
-    
+
+        var sw = new Stopwatch();
+        sw.Start();
         var task = Parallel.ForAsync(0, samples, (i, _) =>
         {
             var graph = Generator.Generate(9);
@@ -45,7 +48,7 @@ using AZProjekt;
 
         while (!task.IsCompleted)
         {
-            Console.WriteLine($"{solvedCount}/{samples} - {Math.Round((double)solvedCount / samples * 100, 4)}% - {incorrect.Count} WRONG - {lowerCount} LOWER");
+            Console.WriteLine($"{solvedCount}/{samples} - {Math.Round((double)solvedCount / samples * 100, 4):F4}% - {incorrect.Count} WRONG - {lowerCount} LOWER - ELAPSED {sw.Elapsed:g} - ESTIMATED REMAINING {(sw.Elapsed * ((float)samples / (solvedCount + 1)) - sw.Elapsed):g}");
             await Task.Delay(250);
         }
 
