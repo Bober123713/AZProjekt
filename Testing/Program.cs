@@ -42,7 +42,7 @@ public static class TestRunner
 
                     // Time for Approximation
                     var swApprox = Stopwatch.StartNew();
-                    var approx = Solver.ApproxBottleneckTsp(graph, 0);
+                    var approx = Solver.ApproxBottleneckTsp(graph, out var tour);
                     swApprox.Stop();
 
                     // Time for Exact
