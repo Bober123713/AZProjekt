@@ -96,7 +96,7 @@ foreach (var inputPath in inputFiles)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Błąd przy pliku {Path.GetFileName(inputPath)}: {ex.Message}");
+        Console.WriteLine($"!!! Błąd przy pliku {Path.GetFileName(inputPath)}: {ex.Message} !!!");
     }
 }
 
@@ -135,7 +135,7 @@ static (bool, bool, Solution, Solution) CompareSolutions(string[] input)
     if (approxSolution.Cost < exactSolution.Cost)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("⚠️ Approximation gave better result than exact. Possible bug.");
+        sb.AppendLine("!!! Approximation gave better result than exact. Possible bug. !!!");
         sb.AppendLine(PrintGraph2(graph));
         sb.AppendLine("---TOUR---");
         sb.AppendLine(string.Join(" ,", tour.Select(t => t + 1)));
