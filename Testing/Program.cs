@@ -1,10 +1,9 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Text;
 using AZProjekt;
-using AZProjekt.Models;
+
+namespace Testing;
 
 public static class TestRunner
 {
@@ -14,9 +13,9 @@ public static class TestRunner
         var medium = new[] { 8, 9, 10, 11, 12 };
         var large = new[] { 15, 18, 21 };
 
-        int samplesPerSize = 10;
-        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string resultFile = $"results_{timestamp}.csv";
+        const int samplesPerSize = 10;
+        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        var resultFile = $"results_{timestamp}.csv";
 
         using var writer = new StreamWriter(resultFile, false, Encoding.UTF8);
         writer.WriteLine("Category,Size,Sample,ApproxCost,ExactCost,CostRatio,ApproxTimeMs,ExactTimeMs,TimeRatio");
@@ -34,7 +33,7 @@ public static class TestRunner
         {
             Console.WriteLine($"Testing {category} size {size}");
 
-            for (int i = 0; i < samples; i++)
+            for (var i = 0; i < samples; i++)
             {
                 try
                 {
@@ -51,10 +50,10 @@ public static class TestRunner
                     var exact = AZProjekt.Exact.Solver.ConvertAndSolve(graph);
                     swExact.Stop();
 
-                    double costRatio = approx.Cost / exact.Cost;
-                    double approxTime = swApprox.Elapsed.TotalMilliseconds;
-                    double exactTime = swExact.Elapsed.TotalMilliseconds;
-                    double timeRatio = approxTime / (exactTime == 0 ? 1 : exactTime); // avoid division by zero
+                    var costRatio = approx.Cost / exact.Cost;
+                    var approxTime = swApprox.Elapsed.TotalMilliseconds;
+                    var exactTime = swExact.Elapsed.TotalMilliseconds;
+                    var timeRatio = approxTime / (exactTime == 0 ? 1 : exactTime); // avoid division by zero
 
                     writer.WriteLine(
                         $"{category},{size},{i + 1}," +

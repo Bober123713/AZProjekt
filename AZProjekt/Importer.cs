@@ -3,14 +3,14 @@ using AZProjekt.Models;
 
 namespace AZProjekt;
 
+public enum InputFormat
+{
+    Euclidean,
+    Matrix
+}
+
 public static class Importer
 {
-    private enum InputFormat
-    {
-        Euclidean,
-        Matrix
-    }
-
     public static Graph Import(string filePath)
     {
         try

@@ -8,6 +8,7 @@ public static class Generator
     public static string[] Generate(
         int vertexCount,
         double maxCoordinateValue = 100.0,
+        InputFormat format = InputFormat.Matrix,
         int? randomSeed = null)
     {
         if (vertexCount <= 0)
@@ -23,35 +24,45 @@ public static class Generator
             coordinates.Add((x, y));
         }
 
-        var distances = new double[vertexCount, vertexCount];
-        for (var i = 0; i < vertexCount; i++)
+        var lines = new List<string>();
+        if (format is InputFormat.Euclidean)
         {
-            for (var j = 0; j < vertexCount; j++)
+            lines.Add($"{vertexCount} a");
+            foreach (var (x, y) in coordinates)
+                lines.Add($"{x.ToString("F3", CultureInfo.InvariantCulture)} {y.ToString("F3", CultureInfo.InvariantCulture)}");
+        }
+        else if (format is InputFormat.Matrix)
+        {
+            lines.Add($"{vertexCount} b");
+            
+            var distances = new double[vertexCount, vertexCount];
+            for (var i = 0; i < vertexCount; i++)
             {
-                if (i == j)
+                for (var j = 0; j < vertexCount; j++)
                 {
-                    distances[i, j] = 0.0;
-                }
-                else
-                {
-                    var dx = coordinates[i].x - coordinates[j].x;
-                    var dy = coordinates[i].y - coordinates[j].y;
-                    distances[i, j] = Math.Sqrt(dx * dx + dy * dy);
+                    if (i == j)
+                    {
+                        distances[i, j] = 0.0;
+                    }
+                    else
+                    {
+                        var dx = coordinates[i].x - coordinates[j].x;
+                        var dy = coordinates[i].y - coordinates[j].y;
+                        distances[i, j] = Math.Sqrt(dx * dx + dy * dy);
+                    }
                 }
             }
-        }
         
-        var lines = new List<string> { $"{vertexCount} b" };
-        
-        for (var i = 0; i < vertexCount; i++)
-        {
-            var sb = new StringBuilder();
+            for (var i = 0; i < vertexCount; i++)
+            {
+                var sb = new StringBuilder();
             
-            for (var j = 0; j < vertexCount; j++) 
-                sb.Append($" {distances[i, j].ToString("F3", CultureInfo.InvariantCulture)}");
+                for (var j = 0; j < vertexCount; j++) 
+                    sb.Append($" {distances[i, j].ToString("F3", CultureInfo.InvariantCulture)}");
 
-            sb.Remove(0, 1);
-            lines.Add(sb.ToString());
+                sb.Remove(0, 1);
+                lines.Add(sb.ToString());
+            }
         }
 
         return lines.ToArray();
