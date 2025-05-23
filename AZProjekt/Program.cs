@@ -38,6 +38,7 @@ while (true)
             }
             if(lower)
                 Interlocked.Increment(ref lowerCount);
+            Interlocked.Increment(ref solvedCount);
             return ValueTask.CompletedTask;
         });
 
