@@ -21,7 +21,7 @@ public class Solver
         var cost = converter.Convert(graph.AdjacencyMatrix);
         
         // Solve using the converted cost matrix
-        var (tour, _) = SolveTsp(cost);
+        var tour = SolveTsp(cost);
         
         // Calculate bottleneck using original weights
         double bottleneck = CalculateBottleneck(tour, graph.AdjacencyMatrix);
@@ -31,30 +31,11 @@ public class Solver
         
         return new Solution(bottleneck, tour1Based);
     }
-    
-    /// <summary>
-    /// Solves the TSP directly using the provided cost matrix
-    /// </summary>
-    public static Solution Solve(List<List<double>> cost)
-    {
-        if (cost == null)
-            throw new ArgumentNullException(nameof(cost));
-            
-        var (tour, _) = SolveTsp(cost);
-        
-        // Calculate bottleneck
-        double bottleneck = CalculateBottleneck(tour, cost);
-        
-        // Convert to 1-based indices for the final solution
-        var tour1Based = tour.Select(v => v + 1).ToList();
-        
-        return new Solution(Converter.FromDictionary[bottleneck], tour1Based);
-    }
-    
+
     /// <summary>
     /// Core TSP solving algorithm using dynamic programming
     /// </summary>
-    private static (List<int> tour, double cost) SolveTsp(List<List<double>> cost)
+    private static List<int> SolveTsp(List<List<double>> cost)
     {
         var n = cost.Count;
         
@@ -71,7 +52,7 @@ public class Solver
         
         // Handle special case for n=1
         if (n == 1)
-            return (new List<int> { 0, 0 }, 0.0);
+            return [0, 0];
             
         // Check for potential overflow
         if (n > 30)
@@ -143,26 +124,9 @@ public class Solver
         
         tour.Add(0); // Add starting node
         tour.Reverse(); // Reverse to get correct order
+        tour.Add(0);
         
-        return (tour, bestCost);
-    }
-    
-    /// <summary>
-    /// Calculates the bottleneck value for a tour using the given cost matrix
-    /// </summary>
-    private static double CalculateBottleneck(List<int> tour, double[][] originalCosts)
-    {
-        double bottleneck = 0.0;
-        
-        for (int i = 0; i < tour.Count - 1; i++)
-        {
-            bottleneck = Math.Max(bottleneck, originalCosts[tour[i]][tour[i + 1]]);
-        }
-        
-        // Add the edge from last to first node to complete the cycle
-        bottleneck = Math.Max(bottleneck, originalCosts[tour[^1]][tour[0]]);
-        
-        return bottleneck;
+        return tour;
     }
     
     /// <summary>

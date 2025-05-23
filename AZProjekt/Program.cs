@@ -5,7 +5,7 @@ using AZProjekt;
 while (true)
     try
     {
-        Console.WriteLine("Please number of samples:");
+        Console.WriteLine("Please enter number of samples:");
         var samplesString = Console.ReadLine() ?? throw new InvalidOperationException();
         if (!int.TryParse(samplesString, out var samples))
             continue;
@@ -13,12 +13,13 @@ while (true)
         var correctCount = 0;
     
         int solvedCount = 0;
+        int lowerCount = 0;
         var incorrect = new ConcurrentQueue<string>();
     
         var task = Parallel.ForAsync(0, samples, (i, _) =>
         {
             var graph = Generator.Generate(9);
-            var (correct, approx, exact) = CompareSolutions(graph);
+            var (correct, lower, approx, exact) = CompareSolutions(graph);
             if (correct)
                 Interlocked.Increment(ref correctCount);
             else
@@ -35,14 +36,14 @@ while (true)
                 sb.AppendLine("--------------------------------------");
                 incorrect.Enqueue(sb.ToString());
             }
-
-            Interlocked.Increment(ref solvedCount);
+            if(lower)
+                Interlocked.Increment(ref lowerCount);
             return ValueTask.CompletedTask;
         });
 
         while (!task.IsCompleted)
         {
-            Console.WriteLine($"{solvedCount}/{samples} - {Math.Round((double)solvedCount / samples * 100, 4)}% - {incorrect.Count} WRONG");
+            Console.WriteLine($"{solvedCount}/{samples} - {Math.Round((double)solvedCount / samples * 100, 4)}% - {incorrect.Count} WRONG - {lowerCount} LOWER");
             await Task.Delay(250);
         }
 
@@ -50,6 +51,7 @@ while (true)
             if(incorrect.TryDequeue(out var graph))
                 Console.WriteLine(graph);
         Console.WriteLine($"Correct: {correctCount}/{samples} ({Math.Round((double)correctCount / samples * 100, 4)}%)");
+        Console.WriteLine($"Lower: {lowerCount}/{samples} ({Math.Round((double)lowerCount / samples * 100, 4)}%)");
         //Output.PrintResult(graph, approxSolution);
         //Output.PrintEdgeSkips(graph, approxSolution);
         //Output.PrintFullTreeWalk(graph);
@@ -82,11 +84,11 @@ static string PrintGraph2(Graph graph)
     return sb.ToString();
 }
 
-static (bool, Solution, Solution) CompareSolutions(string[] input)
+static (bool, bool, Solution, Solution) CompareSolutions(string[] input)
 {
     var graph = Importer.Import(input);
     
-    var approxSolution = Solver.ApproxBottleneckTsp(graph, 0);
+    var approxSolution = Solver.ApproxBottleneckTsp(graph, out var tour);
     var exactSolution = AZProjekt.Exact.Solver.ConvertAndSolve(graph);
 
     if (approxSolution.Cost < exactSolution.Cost)
@@ -94,6 +96,8 @@ static (bool, Solution, Solution) CompareSolutions(string[] input)
         var sb = new StringBuilder();
         sb.AppendLine("⚠️ Approximation gave better result than exact. Possible bug.");
         sb.AppendLine(PrintGraph2(graph));
+        sb.AppendLine("---TOUR---");
+        sb.AppendLine(string.Join(" ,", tour.Select(t => t + 1)));
         sb.AppendLine("---APPROX---");
         sb.AppendLine(approxSolution.ToString());
         for (var t = 0; t < approxSolution.Tour.Count - 1; t++)
@@ -109,5 +113,5 @@ static (bool, Solution, Solution) CompareSolutions(string[] input)
         Console.WriteLine(sb.ToString());
     }
     
-    return (approxSolution <= 3 * exactSolution, approxSolution, exactSolution);
+    return (approxSolution <= 3 * exactSolution, exactSolution.Cost > approxSolution.Cost, approxSolution, exactSolution);
 }
