@@ -78,6 +78,7 @@ public static class Solver
         foreach (var edge in mstEdges)
         {
             mstGraph.AddEdge(edge.Source, edge.Destination, edge.Weight);
+            mstGraph.AddEdge(edge.Destination, edge.Source, edge.Weight);
         }
 
         return mstGraph;

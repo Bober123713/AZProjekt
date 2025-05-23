@@ -109,10 +109,9 @@ public static class Importer
                 var dx = coordinates[i].x - coordinates[j].x;
                 var dy = coordinates[i].y - coordinates[j].y;
                 var distance = Math.Sqrt(dx * dx + dy * dy);
-
-                // Round to integer for simplicity in this example
-                var weight = Math.Round(distance);
-                graph.AddEdge(i, j, weight);
+                
+                graph.AddEdge(i, j, distance);
+                graph.AddEdge(j, i, distance);
             }
         }
 
@@ -139,9 +138,8 @@ public static class Importer
                 if (i > j)
                     continue;
 
-                var weight = (int)Math.Round(distance);
-                graph.AddEdge(i, j, weight);
-                graph.AddEdge(j, i, weight);
+                graph.AddEdge(i, j, distance);
+                graph.AddEdge(j, i, distance);
             }
         }
 

@@ -31,15 +31,31 @@ public class Graph
         var sourceIndex = VertexMap[source];
         var destinationIndex = VertexMap[destination];
         AddEdge(sourceIndex, destinationIndex, weight);
+        AddEdge(destinationIndex, sourceIndex, weight);
     }
 
     public void AddEdge(int sourceIndex, int destinationIndex, double weight)
     {
         AdjacencyList[sourceIndex].Add(new Edge(sourceIndex, destinationIndex, weight));
-        AdjacencyList[destinationIndex].Add(new Edge(destinationIndex, sourceIndex, weight));
     }
-    
-    public List<List<double>> AdjacencyMatrix => AdjacencyList.Select(x => x.Select(y => y.Weight).ToList()).ToList();
+
+    public List<List<double>> AdjacencyMatrix => GetAdjacencyMatrix();
+
+    private List<List<double>> GetAdjacencyMatrix()
+    {
+        var matrix = new List<List<double>>();
+        foreach (var (vertexEdges, index) in AdjacencyList.Select((x, i) => (x, i)))
+        {
+            matrix.Add([]);
+            foreach (var edge in vertexEdges)
+            {
+                matrix[index].Add(edge.Weight);
+            }
+            matrix[index].Insert(index, 0);
+        }
+
+        return matrix;
+    }
 }
 
 public record Edge(int Source, int Destination, double Weight);
