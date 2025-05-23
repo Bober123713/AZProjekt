@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Tuchu.Models;
+namespace AZProjekt.Models;
 
 public struct Solution(double cost, List<int> tour)
 {

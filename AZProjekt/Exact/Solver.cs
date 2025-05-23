@@ -1,4 +1,6 @@
-﻿namespace Tuchu.Exact;
+﻿using AZProjekt.Models;
+
+namespace AZProjekt.Exact;
 
 public class Solver
 {

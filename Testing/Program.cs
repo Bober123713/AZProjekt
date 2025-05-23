@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using Tuchu;
-using Tuchu.Models;
+using AZProjekt;
+using AZProjekt.Models;
 
 public static class TestRunner
 {
@@ -48,7 +48,7 @@ public static class TestRunner
 
                     // Time for Exact
                     var swExact = Stopwatch.StartNew();
-                    var exact = Tuchu.Exact.Solver.ConvertAndSolve(graph);
+                    var exact = AZProjekt.Exact.Solver.ConvertAndSolve(graph);
                     swExact.Stop();
 
                     double costRatio = approx.Cost / exact.Cost;

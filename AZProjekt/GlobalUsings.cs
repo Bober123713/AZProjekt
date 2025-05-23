@@ -1,3 +1,3 @@
 // Global using directives
 
-global using Tuchu.Models;
+global using AZProjekt.Models;

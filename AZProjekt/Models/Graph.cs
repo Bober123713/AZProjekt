@@ -1,4 +1,4 @@
-namespace Tuchu.Models;
+namespace AZProjekt.Models;
 
 public class Graph
 {

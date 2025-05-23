@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Tuchu;
+namespace AZProjekt;
 
 public static class Generator
 {

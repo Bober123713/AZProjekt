@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
-using Tuchu;
+using AZProjekt;
 
 while (true)
 {
@@ -78,7 +78,7 @@ static (bool, Solution, Solution) CompareSolutions(string[] input)
     var graph = Importer.Import(input);
     
     var approxSolution = Solver.ApproxBottleneckTsp(graph, 0);
-    var exactSolution = Tuchu.Exact.Solver.ConvertAndSolve(graph);
+    var exactSolution = AZProjekt.Exact.Solver.ConvertAndSolve(graph);
 
     //if (approxSolution.Cost < exactSolution.Cost)
     //{

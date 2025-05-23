@@ -1,4 +1,6 @@
-namespace Tuchu;
+using AZProjekt.Models;
+
+namespace AZProjekt;
 
 public static class Output
 {

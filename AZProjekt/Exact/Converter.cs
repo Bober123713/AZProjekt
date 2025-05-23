@@ -1,4 +1,4 @@
-﻿namespace Tuchu.Exact;
+﻿namespace AZProjekt.Exact;
 
 public static class Converter
 {
