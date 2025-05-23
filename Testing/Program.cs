@@ -11,7 +11,7 @@ public static class TestRunner
     {
         int[] small = [4, 5, 6, 7];
         int[] medium = [8, 9, 10, 11, 12];
-        int[] large = [15, 18, 21];
+        int[] large = [15, 18, 21, 24];
 
         const int samplesPerSize = 10;
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");

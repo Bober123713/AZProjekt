@@ -30,7 +30,12 @@ while (true)
     Console.WriteLine("Podano nieprawidłową wartość. Spróbuj ponownie.");
 }
 
-var outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Inputs");
+// W ramach testowania kodu mozna odkomentowac ponizszy outputDir
+//var outputDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\AZProjekt"));
+var outputDir = Path.Combine(Directory.GetCurrentDirectory());
+//var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
+
+
 Directory.CreateDirectory(outputDir);
 
 for (var i = 0; i < count; i++)

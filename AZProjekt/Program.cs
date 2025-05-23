@@ -2,7 +2,8 @@
 using System.Text;
 using AZProjekt;
 
-while (true)
+// PONIZSZY KOD ZOSTAL ZAKOMENTOWANY I BYL UZYWANY DO TESTOWANIA DZIALANIA PROGRAMU PODCZAS JEGO TWORZENIA
+/*while (true)
     try
     {
         Console.WriteLine("Please enter number of samples:");
@@ -62,7 +63,43 @@ while (true)
         Console.WriteLine(e);
         Console.WriteLine("Press return to continue...");
         Console.ReadLine();
+    }*/
+
+// W ramach testowania kodu mozna odkomentowac ponizszy inputDir 
+//var inputDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\AZProjekt"));
+
+var inputDir = Directory.GetCurrentDirectory();
+var inputFiles = Directory.GetFiles(inputDir, "input_*.txt");
+
+Console.WriteLine($"Znaleziono {inputFiles.Length} plików wejściowych w {inputDir}.");
+
+foreach (var inputPath in inputFiles)
+{
+    try
+    {
+        // Importuj graf z pliku
+        var graph = Importer.Import(inputPath);
+
+        // Oblicz trasę aproksymacyjną
+        var solution = Solver.ApproxBottleneckTsp(graph, out _);
+
+        // Przygotuj nazwę pliku wyjściowego
+        var outputPath = Path.ChangeExtension(inputPath, ".out.txt");
+
+        // Zapisz rozwiązanie
+        File.WriteAllText(outputPath, solution.ToString());
+
+        Console.WriteLine($"Zapisano wynik do {Path.GetFileName(outputPath)}");
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Błąd przy pliku {Path.GetFileName(inputPath)}: {ex.Message}");
+    }
+}
+
+Console.WriteLine("Gotowe!");
+
+Console.ReadLine();
 
 static string PrintGraph(string[] graph)
 {
