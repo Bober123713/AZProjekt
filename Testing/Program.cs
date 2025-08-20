@@ -13,7 +13,7 @@ public static class TestRunner
         int[] medium = [8, 9, 10, 11, 12];
         int[] large = [15, 18, 21, 24];
 
-        const int samplesPerSize = 10;
+        const int samplesPerSize = 100;
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         var resultFile = $"results_{timestamp}.csv";
 

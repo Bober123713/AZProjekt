@@ -34,7 +34,7 @@ public class Graph
         AddEdge(destinationIndex, sourceIndex, weight);
     }
 
-    public void AddEdge(int sourceIndex, int destinationIndex, double weight)
+    public void AddEdge(int sourceIndex, int destinationIndex, double weight = 1)
     {
         AdjacencyList[sourceIndex].Add(new Edge(sourceIndex, destinationIndex, weight));
     }
@@ -58,5 +58,5 @@ public class Graph
     }
 }
 
-public record Edge(int Source, int Destination, double Weight);
+public record Edge(int Source, int Destination, double Weight = 1);
 
